@@ -1,0 +1,104 @@
+# =============================================================================
+# Docker Ignore File for Qortfolio
+# Excludes unnecessary files from Docker build context
+# =============================================================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+tests/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Jupyter notebooks
+notebooks/
+*.ipynb
+.ipynb_checkpoints/
+
+# Local development
+.env.local
+.env.development
+*.local
+
+# Logs and data (will be mounted as volumes)
+logs/
+data/
+*.log
+
+# Cache
+.cache/
+*.cache
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Deployment configs (not needed in container)
+nginx/
+certbot/
+scripts/
+*.service
+
+# DevContainer
+.devcontainer/
+
+# Build artifacts
+*.tar.gz
+*.zip
+
+# Temporary files
+tmp/
+temp/
+*.tmp

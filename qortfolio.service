@@ -1,0 +1,56 @@
+# =============================================================================
+# Qortfolio Systemd Service File
+# Manages Docker Compose application as a system service
+#
+# Installation:
+#   sudo cp qortfolio.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable qortfolio.service
+#   sudo systemctl start qortfolio.service
+# =============================================================================
+
+[Unit]
+Description=Qortfolio Bitcoin Options Analytics Platform
+Documentation=https://github.com/mhmdfasihi/qortfolio
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/qortfolio
+
+# Environment
+Environment="COMPOSE_PROJECT_NAME=qortfolio"
+Environment="COMPOSE_FILE=/opt/qortfolio/docker-compose.yml"
+
+# Start command
+ExecStartPre=/usr/bin/docker-compose pull
+ExecStart=/usr/bin/docker-compose up --remove-orphans
+ExecStop=/usr/bin/docker-compose down
+ExecReload=/usr/bin/docker-compose restart
+
+# Restart policy
+Restart=always
+RestartSec=10
+TimeoutStartSec=300
+TimeoutStopSec=60
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/qortfolio/data /opt/qortfolio/logs /opt/qortfolio/certbot
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=qortfolio
+
+[Install]
+WantedBy=multi-user.target
