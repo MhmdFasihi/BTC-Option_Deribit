@@ -1,0 +1,70 @@
+# =============================================================================
+# qortfolio (Streamlit v1) — VPS co-hosting compose
+# Differences vs the repo's docker-compose.yml:
+#   - NO nginx / NO certbot here  (a single shared host-level nginx fronts both apps)
+#   - app port published to 127.0.0.1 ONLY (host nginx reaches it, the world cannot)
+#   - keeps only what v1 actually needs at runtime: the Streamlit app + Redis
+# Run from /opt/qortfolio:
+#   docker compose -f docker-compose.vps.yml --env-file .env up -d --build
+# =============================================================================
+name: qortfolio
+
+services:
+  qortfolio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: qortfolio:vps
+    container_name: qortfolio-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - LOG_LEVEL=INFO
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    ports:
+      - "127.0.0.1:8501:8501"   # localhost-only; fronted by host nginx -> qortfolio.com
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - qortfolio-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
+
+  redis:
+    image: redis:7-alpine
+    container_name: qortfolio-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - qortfolio-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  qortfolio-net:
+    driver: bridge
+
+volumes:
+  redis_data:
+    driver: local
